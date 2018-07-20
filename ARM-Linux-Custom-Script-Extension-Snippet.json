@@ -3,7 +3,7 @@
     "type": "Microsoft.Compute/virtualMachines/extensions",
     "location": "[resourceGroup().location]",
     "apiVersion": "2015-06-15",
-    "dependsOn": [f
+    "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
     ],
     "properties": {
