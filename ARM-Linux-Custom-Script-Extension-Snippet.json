@@ -1,0 +1,22 @@
+{
+    "name": "[concat(parameters('virtualMachineName'), '/configure-VSTSAgent')]",
+    "type": "Microsoft.Compute/virtualMachines/extensions",
+    "location": "[resourceGroup().location]",
+    "apiVersion": "2015-06-15",
+    "dependsOn": [f
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+    ],
+    "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+            "timestamp": 123456789
+        },
+        "protectedSettings": {
+            "commandToExecute": "",
+            "script": "[parameters('encodedScript')]"
+        }
+    }
+}
