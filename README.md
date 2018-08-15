@@ -32,3 +32,14 @@ AgentType - The REST API calls for the Agent Type requested, this could be one o
 The script updates a variable, AgentDownloadUrl, that can be used in the pipeline.
 
 I use the script in a Inline PowerShell task
+
+## Update VSTS Build Definitions based on TFS queues
+In the Builds folder I added two scripts;
+1. Read-QueuesFromTfs.ps1
+2. Repair-BuildDefinitions.ps1
+
+Both script requires a parameters PersonalAccesToken - One is a PAT for the VSTS account you are targeting and one for targeting the TFS environment.
+
+First script helps you get a `queues.json` file that holds all TFS Queues.
+Second script iterates the VSTS projects you are targeting for updating the build definitions.
+Scripts should be quite self explanatory.
