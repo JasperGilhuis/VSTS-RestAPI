@@ -1,10 +1,9 @@
 function GetVSTSCredential () {
     Param(
-        $UserEmail,
         $Token
     )
 
-    $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $UserEmail, $Token)))
+    $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes((":{0}" -f $Token)))
     return @{Authorization = ("Basic {0}" -f $base64AuthInfo)}
 }
 function Get-AllGroupsGraph() {
@@ -15,7 +14,7 @@ function Get-AllGroupsGraph() {
     try {
         
         # Base64-encodes the Personal Access Token (PAT) appropriately
-        $authorization = GetVSTSCredential -Token $userParams.PAT -userEmail $userParams.userEmail
+        $authorization = GetVSTSCredential -Token $userParams.PAT
 
         # https://xpirit-jasper.vssps.visualstudio.com/_apis/graph/groups?api-version=5.0-preview
         # find all groups from Graph API
@@ -37,7 +36,7 @@ function Get-AllUsersGraph() {
     try {
         
         # Base64-encodes the Personal Access Token (PAT) appropriately
-        $authorization = GetVSTSCredential -Token $userParams.PAT -userEmail $userParams.userEmail
+        $authorization = GetVSTSCredential -Token $userParams.PAT
 
         # https://xpirit-jasper.vssps.visualstudio.com/_apis/graph/users?api-version=5.0-preview
         # find all users from Graph API
@@ -61,7 +60,7 @@ function Get-UsersStorageKey() {
     try {
         
         # Base64-encodes the Personal Access Token (PAT) appropriately
-        $authorization = GetVSTSCredential -Token $userParams.PAT -userEmail $userParams.userEmail
+        $authorization = GetVSTSCredential -Token $userParams.PAT
 
         $Uri = $user._Links.StorageKey.href
 
@@ -81,13 +80,14 @@ function Add-TeamAdministrator() {
     Param(
         [Parameter(Mandatory = $true)] $UserParams,
         [Parameter(Mandatory = $true)] $TeamId,
-        [Parameter(Mandatory = $true)] $UserStorageKey
+        [Parameter(Mandatory = $true)] $UserStorageKey,
+        [Parameter(Mandatory = $true)] $TeamProjectName
     )
 
     try {
         
         # Base64-encodes the Personal Access Token (PAT) appropriately
-        $authorization = GetVSTSCredential -Token $UserParams.PAT -userEmail $UserParams.userEmail
+        $authorization = GetVSTSCredential -Token $UserParams.PAT
           
         # add user to group
         $userData = @{
@@ -98,7 +98,7 @@ function Add-TeamAdministrator() {
         $json = ConvertTo-Json -InputObject $userData
 
         # .visualstudio.com/TeamPermissions/_api/_identity/AddTeamAdmins?__v=5
-        $Uri = "https://" + $userParams.VSTSAccount + ".visualstudio.com/TeamPermissions/_api/_identity/AddTeamAdmins?__v=5"
+        $Uri = "https://" + $userParams.VSTSAccount + ".visualstudio.com/" + $TeamProjectName +"/_api/_identity/AddTeamAdmins?__v=5"
         $result = Invoke-RestMethod -Uri $Uri -Method Post -Headers $authorization -ContentType "application/json" -Body $json
         return $result
     }
@@ -128,7 +128,7 @@ function CreateTeamAdministrator() {
         $userStorageKey = Get-UsersStorageKey -UserParams $userParameters -User $user
 
         # Add the Team Administrator
-        $administors = Add-TeamAdministrator -UserParams $userParameters -TeamId $group.originid  -UserStorageKey $userStorageKey
+        $administors = Add-TeamAdministrator -UserParams $userParameters -TeamId $group.originid  -UserStorageKey $userStorageKey -TeamProjectName $TeamProjectName
 
         # List Team Admins
         $administors.admins | ForEach-Object {
@@ -155,7 +155,7 @@ if (Test-Path -Path $TranscriptFile) {
 }
 Start-Transcript -Path $TranscriptFile
 
-## Main Logic, define inputs
+## Main Logic, define your inputs here
 $TeamProjectName = "TeamPermissions"
 $TeamName = "Team One"
 $UserEmail = "emailaccount@host.com"
